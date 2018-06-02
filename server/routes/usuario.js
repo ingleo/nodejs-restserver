@@ -1,10 +1,37 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const _ = require('underscore');
 const Usuario = require('../models/usuario');
 var app = express();
 
 app.get('/usuario', function(req, res) {
-    res.json('get Usuario local');
+
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+
+    Usuario.find({ estado: true }, 'nombre email img role estado google')
+        .skip(desde)
+        .limit(limite)
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            Usuario.count({ estado: true }, (err, conteo) => {
+                res.json({
+                    ok: true,
+                    usuarios,
+                    conteo
+                });
+            });
+        });
 });
 
 app.post('/usuario', function(req, res) {
@@ -22,8 +49,8 @@ app.post('/usuario', function(req, res) {
             return res.status(400).json({
                 ok: false,
                 err
-            })
-        }
+            });
+        };
 
         res.json({
             ok: true,
@@ -35,14 +62,80 @@ app.post('/usuario', function(req, res) {
 app.put('/usuario/:id', function(req, res) {
 
     let id = req.params.id;
+    let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
-    res.json({
-        id
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        };
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB
+        });
     });
 });
 
-app.delete('/usuario', function(req, res) {
-    res.json('delete Usuario');
+app.delete('/usuario/:id', function(req, res) {
+
+    //Borrado físico
+    //let id = req.params.id;
+    // Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+    //     if (err) {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             err
+    //         });
+    //     };
+
+    //     if (!usuarioBorrado) {
+    //         return res.status(400).json({
+    //             ok: false,
+    //             err: {
+    //                 message: 'Usuario no encontrado'
+    //             }
+    //         });
+    //     };
+
+    //     res.json({
+    //         ok: true,
+    //         usuario: usuarioBorrado
+    //     });
+    // });
+
+    let id = req.params.id;
+    let body = _.pick(req.body, ['estado']);
+
+    let cambiaEstado = {
+        estado: false
+    };
+
+    Usuario.findByIdAndUpdate(id, cambiaEstado, { new: true }, (err, usuarioBorrado) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        };
+
+        if (!usuarioBorrado) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado'
+                }
+            });
+        };
+
+        res.json({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+    });
+
 });
 
 module.exports = app;
