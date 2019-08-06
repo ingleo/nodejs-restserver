@@ -18,10 +18,12 @@ app.use(express.static(path.resolve(__dirname, '../public')));
 //configuración global de rutas
 app.use(require('./routes/index'));
 
-mongoose.connect(process.env.URLDB, (err, res) => {
-    if (err) throw err;
-    console.log('Se ha conectado a la BD');
-});
+mongoose.connect(process.env.URLDB,
+    { useNewUrlParser: true, useCreateIndex: true },
+    (err, res) => {
+        if (err) throw err;
+        console.log('Se ha conectado a la BD');
+    });
 
 app.listen(process.env.PORT, () => {
     console.log('Escuchando puerto', process.env.PORT);
