@@ -37,7 +37,7 @@ app.get("/usuario", [verificaToken], (req, res) => {
     });
 });
 
-app.post("/usuario", (req, res) => {
+app.post("/usuario", [verificaToken, verificaAdminRole], (req, res) => {
   console.log("3");
   let body = req.body;
   let usuario = new Usuario({
