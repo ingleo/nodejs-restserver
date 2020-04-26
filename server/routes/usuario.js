@@ -23,7 +23,7 @@ app.get("/usuario", [verificaToken], (req, res) => {
       if (err) {
         return res.status(400).json({
           ok: false,
-          err
+          err,
         });
       }
 
@@ -37,8 +37,8 @@ app.get("/usuario", [verificaToken], (req, res) => {
     });
 });
 
-app.post("/usuario", [verificaToken, verificaAdminRole], (req, res) => {
-    console.log("3");
+app.post("/usuario", (req, res) => {
+  console.log("3");
   let body = req.body;
   let usuario = new Usuario({
     nombre: body.nombre,
