@@ -1,42 +1,44 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 //verificar token
 
 let verificaToken = (req, res, next) => {
-    let token = req.get('token');
+  console.log("1");
+  let token = req.get("token");
 
-    jwt.verify(token, process.env.SEED, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({
-                ok: false,
-                err
-            });
-        }
+  jwt.verify(token, process.env.SEED, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({
+        ok: false,
+        err: {
+          message: "Token inválido",
+        },
+      });
+    }
 
-        req.usuario = decoded.usuario;
-        next();
-    });
+    req.usuario = decoded.usuario;
+    next();
+  });
 };
-
 
 //verifica role admin
 let verificaAdminRole = (req, res, next) => {
+  console.log("2");
+  let usuario = req.usuario;
 
-    let usuario = req.usuario;
-
-    if (usuario.role !== 'ADMIN_ROLE') {
-        return res.status(401).json({
-            ok: false,
-            err: {
-                message: 'El usuario no posee privilegios suficientes'
-            }
-        });
-    }
-
+  if (usuario.role === "ADMIN_ROLE") {
     next();
+  } else {
+    return res.status(401).json({
+      ok: false,
+      err: {
+        message: "El usuario no posee privilegios suficientes",
+      },
+    });
+  }
 };
 
 module.exports = {
-    verificaToken,
-    verificaAdminRole
-}
+  verificaToken,
+  verificaAdminRole,
+};
