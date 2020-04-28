@@ -97,7 +97,7 @@ app.post("/google", async (req, res) => {
         return res.status(400).json({
           ok: false,
           err: {
-            message: "Debe de usar su autenticación normal",
+            message: "Debe usar su autenticación normal",
           },
         });
       } else {
